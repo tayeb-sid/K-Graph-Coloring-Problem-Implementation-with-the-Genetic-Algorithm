@@ -1,6 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+from genetic_algorithm import fitness
 
 def generate_color_palette(k):
     """
@@ -24,9 +25,9 @@ def describe_coloriage(coloring):
     for node, color in enumerate(coloring):
         print(f"Node {node + 1}: Color {color}")
 
-def print_population(population):
+def print_population(population,graph):
     """
     affiche la population
     """
     for coloriage in population:
-        print(coloriage)
+        print(coloriage,'|',fitness(coloriage,graph)[0])

@@ -8,10 +8,10 @@ k=4
 color_palette=generate_color_palette(k)
 
 graph=generate_connected_random_graph(n_nodes,proba)
-coloriage=generer_coloriage(n_nodes,k)
 
-print("coloriage: ",coloriage)
-f,conflicted_pairs=fitness(coloriage,graph)
-print("fitness : ",f," conflicted_pairs ",conflicted_pairs)
-describe_coloriage(coloriage)
-plot_graph(graph,coloriage,color_palette)
+pop= generer_population(5,n_nodes,k)
+print_population(pop,graph)
+
+p1,p2=elitist_selection(pop,graph)
+
+print(p1,fitness(p1,graph)[0],p2,fitness(p1,graph)[0])

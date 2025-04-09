@@ -2,8 +2,8 @@ import random
 
 def fitness(coloriage,graph):
     """
-        fitness =1/1+nb_conflits (+1 /nb_couleurs_utilisées à ajouter plus tard)
-        cette fonction retourne la fitness d'un coloriage et les noeuds qui sont en conflit si y'en a 
+    fitness =1/1+nb_conflits (+1 /nb_couleurs_utilisées à ajouter plus tard)
+    cette fonction retourne la fitness d'un coloriage et les noeuds qui sont en conflit si y'en a 
     """
     conflicted_pairs=set()
     for node,color in enumerate(coloriage):
@@ -12,8 +12,7 @@ def fitness(coloriage,graph):
             if coloriage[node]==coloriage[neighbor-1]:
                 conflicted_pairs.add(tuple(sorted([node + 1, neighbor])))
     
-    return 1/(1+len(conflicted_pairs)),conflicted_pairs
-
+    return round(1/(1+len(conflicted_pairs)),3),conflicted_pairs
 
 def generer_coloriage(n_nodes,k):
     """
@@ -34,8 +33,12 @@ def generer_population(p_size,n_nodes,k):
         population.append(generer_coloriage(n_nodes,k))
     return population
 
-def selection(population, method="roulette"):
+def selection(population,graph,method="elitist"):
     pass
+
+def elitist_selection(population,graph):
+    return sorted(population, key=lambda genome: fitness(genome, graph), reverse=True)[:2]
+
 
 def crossover(parent1, parent2, method="single_point"):
     pass
