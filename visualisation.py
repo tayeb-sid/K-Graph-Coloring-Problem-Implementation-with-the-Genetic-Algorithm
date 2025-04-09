@@ -2,17 +2,24 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from genetic_algorithm import fitness
-
-def generate_color_palette(k):
+import random
+def generate_color_palette(k=10000):
     """
     genere la palette de couleurs a utiliser dans l'affichage
     """
     cmap = cm.get_cmap("tab20", k)  
-    return [cmap(i) for i in range(k)]
-def plot_graph(G, coloriage, color_palette):
+    palette=[cmap(i) for i in range(k)]
+    for i in range (5):
+        random.shuffle(palette)
+    return palette
+def plot_graph(G, coloriage):
     """
     affiche le graphe
     """
+    color_palette =generate_color_palette()
+   
+
+
     node_colors = [color_palette[color-1] for color in coloriage]
     plt.figure(figsize=(6, 6))
     nx.draw(G, with_labels=True, node_color=node_colors, edge_color="gray", node_size=500, font_size=10)
@@ -25,9 +32,4 @@ def describe_coloriage(coloring):
     for node, color in enumerate(coloring):
         print(f"Node {node + 1}: Color {color}")
 
-def print_population(population,graph):
-    """
-    affiche la population
-    """
-    for coloriage in population:
-        print(coloriage,'|',fitness(coloriage,graph)[0])
+
