@@ -39,22 +39,95 @@ def generer_population(p_size,n_nodes):
     for i in range(p_size):
         population.append(generer_coloriage(n_nodes))
     return population
-
-def selection(population,graph,method):
-    if method=="elitist":
-        return elitist_selection(population,graph)
+def selection(population, graph, method, num_selected=None, tournament_size=None):
+    if method == "elitist":
+        return elitist_selection(population, graph)
+    elif method == "roulette":
+        return roulette_selection(population, graph, num_selected)
+    elif method == "rank":
+        return rank_selection(population, graph, num_selected)
+    elif method == "tournament":
+        return tournament_selection(population, graph, num_selected, tournament_size)
+    else:
+        raise ValueError("Méthode de sélection inconnue")
 
 def elitist_selection(population,graph):
     return sorted(population, key=lambda genome: fitness(genome, graph), reverse=True)[:2]
 
+def roulette_selection(population,graph, num_selected):
+    # Calcul du fitness pour chaque individu
+    fitnesses = [fitness(genome, graph)[0] for genome in population] 
+    
+    # Calcul des probabilités de sélection
+    total_fitness = sum(fitnesses)
+    probabilities = [f / total_fitness for f in fitnesses]
+    
+    # Sélection par roue de la roulette
+    selected = random.choices(population, weights=probabilities, k=num_selected)
+    
+    return selected
 
-def crossover(parent1, parent2, method,crossoverPoint1,crossoverPoint2=None):
-    if method=="single_point":
+def rank_selection(population, graph, num_selected) :
+    # Calcul des fitness pour chaque individu
+    fitnesses = [fitness(genome, graph)[0] for genome in population]
+    
+    # Tri des individus selon leur fitness
+    sorted_population = sorted(zip(fitnesses, population), reverse=True)
+    
+    # Extraction des individus triés
+    sorted_individuals = [ind for _, ind in sorted_population]
+    
+    # Attribuer un rang à chaque individu (de 1 à N)
+    ranks = list(range(1, len(population) + 1))
+    
+    # Calculer la probabilité de sélection pour chaque individu
+    total_rank = sum(ranks)
+    probabilities = [rank / total_rank for rank in ranks]
+    
+    # Sélectionner les individus en fonction de leurs rangs
+    selected = random.choices(sorted_individuals, weights=probabilities, k=num_selected)
+    
+    return selected
+
+def tournament_selection(population, graph, num_selected, tournament_size=3):
+    selected = []
+
+    for _ in range(num_selected):
+        # Sélectionner un sous-ensemble aléatoire de la population pour le tournoi
+        tournament = random.sample(population, tournament_size)
+        
+        # Calculer les fitness pour chaque individu du tournoi
+        tournament_fitnesses = [fitness(individual, graph)[0] for individual in tournament]
+
+        # Trouver l'individu avec le meilleur fitness (le gagnant du tournoi)
+        winner = tournament[tournament_fitnesses.index(max(tournament_fitnesses))]
+
+        # Ajouter le gagnant du tournoi à la liste des sélectionnés
+        selected.append(winner)
+
+    return selected
+
+def crossover(parent1, parent2, method,crossoverPoint1):
+    if method=="one_point":
         return single_point_crossover(parent1,parent2,crossoverPoint1)
+    else :
+        return two_point_crossover(parent1,parent2)
 
 def single_point_crossover(parent1, parent2,point):
     child1 = parent1[:point] + parent2[point:]
     child2 = parent2[:point] + parent1[point:]
+    return child1, child2
+
+def two_point_crossover(parent1, parent2):
+    # Choisir deux points de croisement aléatoires
+    point1 = random.randint(1, len(parent1) - 1)  # Première position (entre 1 et len-1)
+    print("point1",point1)
+    point2 = random.randint(point1, len(parent1))  # Deuxième position (entre point1 et len)
+    print("point2",point2)
+    # Créer les enfants en échangeant les segments
+    child1 = parent1[:point1] + parent2[point1:point2] + parent1[point2:]
+    child2 = parent2[:point1] + parent1[point1:point2] + parent2[point2:]
+
     return child1, child2
 
 def mutation(genome, mutation_rate):
@@ -63,7 +136,7 @@ def mutation(genome, mutation_rate):
         genome[i], genome[j] = genome[j], genome[i]
     return genome
 
-def genetic_algorithm(graph, n_generations, population_size, selection_type,mutation_rate,crossover_methode,crossoverPoint1,crossoverPoint2=None):
+def genetic_algorithm(graph, n_generations, population_size,selection_type,num_selected,tournament_size,mutation_rate,crossover_methode,crossoverPoint1):
     population=generer_population(population_size,graph.number_of_nodes())
     population= sorted(population, key=lambda genome: fitness(genome, graph), reverse=True)
     print("*****population initiale*****")
@@ -74,7 +147,7 @@ def genetic_algorithm(graph, n_generations, population_size, selection_type,muta
     print_coloriage(best,graph)
     for i in range(n_generations):
         print("-------------iteration ",i+1,"--------------")
-        parents=selection(population,graph,selection_type)
+        parents=selection(population,graph,selection_type,num_selected,tournament_size)
         p1=parents[0]
         p2=parents[1]
         print("parents: ")
