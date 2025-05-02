@@ -1,0 +1,22 @@
+
+==== Experiment 1 ====
+Selection Type: elitist
+Crossover Method: single_point
+Mutation Rate: 40.0%
+Generations: 10
+Population Size: 10
+Execution Time: 0.01 seconds
+Fitness (not a valid solution if < 1): 1.091
+Number of Colors Used: 11
+Coloring: [8, 4, 11, 2, 9, 5, 0, 1, 6, 3, 6, 10]
+
+==== Experiment 2 ====
+Selection Type: elitist
+Crossover Method: single_point
+Mutation Rate: 40.0%
+Generations: 10
+Population Size: 10
+Execution Time: 0.01 seconds
+Fitness (not a valid solution if < 1): 1.111
+Number of Colors Used: 9
+Coloring: [2, 2, 7, 5, 6, 5, 9, 6, 10, 0, 4, 8]

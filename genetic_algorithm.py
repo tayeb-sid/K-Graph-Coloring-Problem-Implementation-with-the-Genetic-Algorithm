@@ -107,13 +107,18 @@ def tournament_selection(population, graph, num_selected, tournament_size=3):
 
     return selected
 
-def crossover(parent1, parent2, method,crossoverPoint1):
+def crossover(parent1, parent2, method):
     if method=="one_point":
-        return single_point_crossover(parent1,parent2,crossoverPoint1)
+        return single_point_crossover(parent1,parent2)
     else :
         return two_point_crossover(parent1,parent2)
 
-def single_point_crossover(parent1, parent2,point):
+def single_point_crossover(parent1, parent2):
+    if len(parent1) < 2:
+        # Not enough length to perform meaningful crossover
+        return parent1[:], parent2[:]
+
+    point = random.randint(1, len(parent1) - 1)
     child1 = parent1[:point] + parent2[point:]
     child2 = parent2[:point] + parent1[point:]
     return child1, child2
@@ -121,9 +126,9 @@ def single_point_crossover(parent1, parent2,point):
 def two_point_crossover(parent1, parent2):
     # Choisir deux points de croisement aléatoires
     point1 = random.randint(1, len(parent1) - 1)  # Première position (entre 1 et len-1)
-    print("point1",point1)
+
     point2 = random.randint(point1, len(parent1))  # Deuxième position (entre point1 et len)
-    print("point2",point2)
+    
     # Créer les enfants en échangeant les segments
     child1 = parent1[:point1] + parent2[point1:point2] + parent1[point2:]
     child2 = parent2[:point1] + parent1[point1:point2] + parent2[point2:]
@@ -136,7 +141,7 @@ def mutation(genome, mutation_rate):
         genome[i], genome[j] = genome[j], genome[i]
     return genome
 
-def genetic_algorithm(graph, n_generations, population_size,selection_type,num_selected,tournament_size,mutation_rate,crossover_methode,crossoverPoint1):
+def genetic_algorithm_console(graph, n_generations, population_size,selection_type,num_selected,tournament_size,mutation_rate,crossover_methode):
     population=generer_population(population_size,graph.number_of_nodes())
     population= sorted(population, key=lambda genome: fitness(genome, graph), reverse=True)
     print("*****population initiale*****")
@@ -153,7 +158,7 @@ def genetic_algorithm(graph, n_generations, population_size,selection_type,num_s
         print("parents: ")
         print_coloriage(p1,graph)
         print_coloriage(p2,graph)
-        c1,c2=crossover(p1,p2,crossover_methode,crossoverPoint1)
+        c1,c2=crossover(p1,p2,crossover_methode)
         print("children: ")
         print_coloriage(c1,graph)
         print_coloriage(c2,graph)
@@ -177,6 +182,28 @@ def genetic_algorithm(graph, n_generations, population_size,selection_type,num_s
         print("********************\n")
 
         
+    return best
+def genetic_algorithm(graph, n_generations, population_size,
+                      selection_type, num_selected, tournament_size,
+                      mutation_rate, crossover_methode,):
+    
+    population = generer_population(population_size, graph.number_of_nodes())
+    population = sorted(population, key=lambda genome: fitness(genome, graph), reverse=True)
+    best = population[0]
+
+    for _ in range(n_generations):
+        parents = selection(population, graph, selection_type, num_selected, tournament_size)
+        p1, p2 = parents[0], parents[1]
+        c1, c2 = crossover(p1, p2, crossover_methode)
+        c1 = mutation(c1, mutation_rate)
+        c2 = mutation(c2, mutation_rate)
+        population.append(c1)
+        population.append(c2)
+        population = sorted(population, key=lambda genome: fitness(genome, graph), reverse=True)
+        
+        if fitness(population[0], graph)[0] > fitness(best, graph)[0]:
+            best = population[0]
+
     return best
 
 
